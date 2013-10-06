@@ -1,0 +1,75 @@
+body {
+	background-color: #0066B2;
+}
+.text {
+	font-family: Microsoft YaHei UI;
+	color:#FFF;
+}
+.footer {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #FFF;
+	font-size:9px;
+}
+.nTab
+{
+    width: 600px;
+    margin: 0px auto;
+    border: 0px;
+    overflow: hidden;
+}
+.none
+{
+    display: none;
+}
+.nTab .TabTitle li
+{
+    float: left;
+    cursor: pointer;
+    height: 35px;
+    line-height: 35px;
+    font-weight: bold;
+    text-align: center;
+    width: 124px;
+}
+.nTab .TabTitle li a
+{
+    text-decoration: none;
+}
+.nTab .TabTitle .active
+{
+    background: white;
+    color: #0066B2;
+}
+.nTab .TabTitle .normal
+{
+    color: white;
+}
+.nTab .TabContent
+{
+    clear: both;
+    overflow: hidden;
+    background: #0066B2;
+    padding: 5px;
+    display: block;
+	border:1px solid #FFF;
+}
+a:link { 
+	color:#FFFFFF; 
+	text-decoration:underline; 
+} 
+a:visited { 
+	color:#FFFFFF; 
+	text-decoration:none; 
+} 
+a:hover { 
+	color:#FFFFFF; 
+	text-decoration:none; 
+} 
+a:active { 
+	color:#FFFFFF; 
+	text-decoration:none; 
+} 
+.version {
+	font-size: 18px;
+	font-family: "Microsoft YaHei UI";
+}
