@@ -5,5 +5,5 @@
 	$res = array (
 		"data" => array("chenjiajie", "lindayi", "liudanyang")
 	);
-	echo $res;
+	echo json_encode($res);
 ?>
