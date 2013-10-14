@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="Access-Control-Allow-Origin" content="*">
 	<title>关系可视化 v3</title>
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
@@ -61,7 +60,7 @@
     <div class="row" style="text-align:center;">
     	<form class="form-search">
         	<div class="input-append">
-                <input class="span6 search-query typeahead" id="keyword" type="text" placeholder="输入人物、地点、组织、事件等实体名">
+                <input id="query" class="span6 search-query typeahead" id="keyword" type="text" placeholder="输入人物、地点、组织、事件等实体名" autocomplete="off">
                 <button class="btn btn-primary" type="submit">搜　索</button>
             </div>
         </form>
@@ -70,27 +69,28 @@
 
 <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
-<script>
-    $('.typeahead').typeahead({
-        source: function(query, process) {
-            $.ajax({
-                url: window.location.origin + "/test.php",
-                type: "GET",
-                dataType: 'JSON',
-                async: true,
-                success: function(res) {
-                    var arr = [];
-                    console.log(res.data);
-                    for (i in res.data) {
-                        arr.push(res.data[i]);
-                    }
-                    process(arr);
-                }
-            });
-        }
-    });
-});
+<script type="text/javascript">
+	$('#query').typeahead({
+		source: function(query, process) {
+			$.ajax({
+				url: "find.php",
+				type: "GET",
+				dataType: "JSON",
+				data: { 
+					"query": query 
+				},
+				async: true,
+				success: function(res) {
+					var arr = [];
+					console.log(res.data);
+					for (i in res.data) {
+						arr.push(res.data[i]);
+					}
+					process(arr);
+				}
+			});
+		}
+	});
 </script>
-
 </body>
 </html>
