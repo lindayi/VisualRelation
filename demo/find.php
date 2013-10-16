@@ -8,7 +8,7 @@
 	//获得查询语句
 	$query = $_GET['query'];
 
-	$result = mysql_query("SELECT name FROM profile WHERE name LIKE \"%".$query."%\" LIMIT 0,10", $conn);
+	$result = mysql_query("SELECT profilename FROM profile WHERE profilename LIKE \"%".$query."%\" LIMIT 0,10", $conn);
 
 	//存入data数组
 	$data = array();
