@@ -11,18 +11,26 @@ start = datetime.datetime.now()
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-#org_path = './'
-person_path = './'
-#location_path = './'
+org_path = './OrgProfile/'
+person_path = './PersonProfile/'
+location_path = './LocationProfile/'
 
-#org_list = listdir(org_path)
+org_list = listdir(org_path)
 person_list = listdir(person_path)
-#location_list = listdir(location_path)
+location_list = listdir(location_path)
 
 xml_list = []
-#xml_list.extend(org_list)
-xml_list.extend(person_list)
-#xml_list.extend(location_list)
+for org in org_list:
+    org = org_path + org 
+    xml_list.append(org)
+
+for person in person_list:
+    person = person_path + person
+    xml_list.append(person)
+
+for location in location_list:
+    location = location_path + location
+    xml_list.append(location)
 
 error_xml = 0
 for xml in xml_list:
@@ -32,7 +40,7 @@ for xml in xml_list:
         # first_flag 用来记录第一次的source
         first_read_flag = 1
         second_read_flag = 0
-        sql = open('person.sql', 'a+')
+        sql = open('v3.sql', 'a+')
         for node in tree.iter():
             # 检索 profileid, profiletype, profilesubtype
             if (node.tag == 'profile'):
@@ -80,14 +88,23 @@ for xml in xml_list:
                 p_mentions = node.text
             # 检索 vip
             elif (node.tag == 'vip'):
-                p_vip = node.text
+                if (node.text == 'true'):
+                    p_vip = 1
+                elif (node.text == 'false'):
+                    p_vip = 0
+                else:
+                    p_vip = node.text
             # 检索 type
             elif (node.tag == 'relation'):
                 r_type = node.attrib.get('type')
             # 检索 destid 和 ne
             elif (node.tag == 'ne'):
                 r_ne = node.text
-                r_destid = node.attrib.get('id')
+                destid = node.attrib.get('id')
+                if (destid):
+                    r_destid = destid
+                else:
+                    r_destid = 0
             # 检索 doc, sentenceid, pubtime, realtime
             elif (node.tag == 'source' and second_read_flag):
                 r_doc = d_file = node.attrib.get('doc')
@@ -95,7 +112,8 @@ for xml in xml_list:
                 d_sentenceid = r_sentenceid = node.attrib.get('id')
                 r_pubtime = node.attrib.get('pubtime')
                 r_realtime = node.attrib.get('realtime')
-                print >> sql, "INSERT INTO doc VALUES ('%s', '%s', '%s');" % (d_file, d_sentenceid, d_text)
+                if (d_text):
+                    print >> sql, "INSERT INTO doc VALUES ('%s', '%s', '%s');" % (d_file, d_sentenceid, d_text)
                 # 对realation表来说每个relation都是一条SQL
                 print >> sql, "INSERT INTO relation VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (r_sourceid, r_destid, r_type, r_ne, r_doc, r_sentenceid, r_pubtime, r_realtime)
             second_read_flag = 1
@@ -104,11 +122,11 @@ for xml in xml_list:
         f.close()
         sql.close()
     except Exception:
-        err = open('person_err_xml.txt', 'a+')
+        err = open('err_xml.txt', 'a+')
         print >> err, xml
         error_xml = error_xml + 1
         err.close()
-print error_xml
+print "%d" % error_xml
 
 end = datetime.datetime.now()
 
