@@ -8,7 +8,7 @@
 	
 	$id[0] = $row["profileid"];
 	if (!($row = mysql_fetch_array($result)))
-		echo "<script>window.location.href='graph.php?id=".$id[0]."';</script>";
+		echo "<script>window.location.href='graph.php?id=".$id[0]."&keyword=".$keyword."';</script>";
 	else $num = 1;
 	do
 	{

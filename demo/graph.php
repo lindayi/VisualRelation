@@ -5,8 +5,9 @@
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">
+  <link href="./bootstrap/css/slider.css" rel="stylesheet">
+  <link href="./bootstrap/css/datetimepicker.css" rel="stylesheet" media="screen">
     
-<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
 	<style type="text/css">
 	body {
 		padding-top: 40px;
@@ -103,8 +104,8 @@ text {
 					</ul>
 
 					<form class="navbar-search pull-right" action="findid.php" method="get">
-						<input type="text" name="keyword" class="search-query span2" placeholder="test">
-              <div id="mySwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
+						<input type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
+            <div id="mySwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
 						  <input type="checkbox" checked />
 						</div>
 					</form>
@@ -117,21 +118,22 @@ text {
   <div class="row-fluid">
     <div class="span9">
       <graph></graph>
-      <script src="http://d3js.org/d3.v3.min.js"></script>
+      <script src="./bootstrap/js/d3.v3.min.js"></script>
       <script>
 
-      var width = 800,
-          height = 500;
+      var width = document.body.clientWidth - 400,
+          height = document.documentElement.clientHeight - 90;
 
       var color = d3.scale.category20();
 
       var force = d3.layout.force().linkDistance(30).linkStrength(2).charge(-30).size([width, height]);
 
-      var svg = d3.select("graph").append("svg").attr("width", "100%").attr("height", "100%").attr("padding-top","40px");
+      var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
 
       // 背景
       //d3.select("body").transition().style("background-color", "grey");
       </script>
+      <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
       <script>
 
       function getdata() {
@@ -183,17 +185,18 @@ text {
                                 }else if(d[3] == "2"){
                                   return color("2");
                                 }else if(d[3] == "3"){
-          			return color("3");
-          		      }else return color("4");
+                                  return color("3");
+                                }else return color("4");
                               }; 
                             })
-          		  .style("stroke-width",1.2);
+          		              .style("stroke-width",1.5);
+        
+
 
           var node = svg.selectAll(".node").data(graph.nodes)
                             .enter().append("g")
                             .attr("class", "node")
-          				  .attr("onclick", function(d){
-          					return "document.getElementById(\"detail\").src = 'detail.php?id="+d.id+"&name="+d.name+"'; ShowDiv('MyDiv','fade');";})
+          				          .attr("onclick", function(d){})
                             .call(force.drag);
 
                         //小圆   2.5-7.5
@@ -211,7 +214,6 @@ text {
                     //      return color(d.group);
                           return color(d.group+"")
                         });
-
 
           node.append("text")
                           .attr("dx", 12)
@@ -236,26 +238,110 @@ text {
       </script>
     </div>
     <div class="span3">
-      <div class="row">
-      	<div class="span3">
+      <div class="row" style="padding-top:40px">
+      	<div class="span12">
       		<div class="modal" style="position: relative; top: auto; left: auto; right: auto; margin: 0 auto 20px; z-index: 1; max-width: 100%;">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                      <h3>筛选器</h3>
+            <div class="modal-header">
+              <h3>筛选</h3>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" action="getData.php" method="get">
+                <div class="control-group">
+                  <div class="span4">
+                    <div id="per_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="人物">
+                      <input type="checkbox" checked />
                     </div>
-                    <div class="modal-body">
-                      <p>开发中…</p>
+                  </div>
+                  <div class="span4">
+                    <div id="loc_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="地点">
+                      <input type="checkbox" checked />
                     </div>
-                    <div class="modal-footer">
-                      <button id="filter" class="btn btn-primary" onclick=getdata()>筛选</button>
+                  </div>
+                  <div class="span4">
+                    <div id="org_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="组织">
+                      <input type="checkbox" checked />
                     </div>
+                  </div>
+                </div>
+                <!--<div class="control-group">
+                  <input type="text" class="span2" value="4" id="sl1">
+                </div>-->
+                <div class="control-group">
+                  <div class="span6">
+                  关系展示:
+                  <div id="tree_graph" class="make-switch switch-small" data-on-label="图状" data-off-label="树状" data-on="primary" data-off="primary">
+                    <input type="checkbox" checked />
+                  </div>
+                  </div>
+                  <div class="span6">
+                  共存关系:
+                  <div id="tree_switch" class="make-switch switch-small" data-on-label="显示" data-off-label="过滤" data-on="primary" data-off="primary">
+                    <input type="checkbox" checked />
+                  </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  起始时间：
+                  <div class="input-append date form_datetime" data-date="" data-date-format="dd MM yyyy - HH:ii p" data-link-field="Tstart" data-picker-position="bottom-left">
+                      <input class="span10" size="16" type="text" value="" readonly>
+                      <span class="add-on"><i class="icon-th"></i></span>
+                  </div>
+                  <input type="hidden" id="Tstart" value="" /><br/>
+                </div>
+                <div class="control-group">
+                  终止时间：
+                  <div class="input-append date form_datetime" data-date="" data-date-format="dd MM yyyy - HH:ii p" data-link-field="Tend" data-picker-position="bottom-left">
+                      <input class="span10" size="16" type="text" value="" readonly>
+                      <span class="add-on"><i class="icon-th"></i></span>
+                  </div>
+                  <input type="hidden" id="Tend" value="" /><br/>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button id="filter" class="btn btn-primary" onclick=getdata()>筛选</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div class="modal" style="position: relative; top: auto; left: auto; right: auto; margin: 0 auto 20px; z-index: 1; max-width: 100%;">
+            <div class="modal-header">
+              <h3>属性</h3>
+            </div>
+            <div class="modal-body">
+              <p>开发中…</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<script>
+        $('#sl1').slider({
+          formater: function(value) {
+            return 'Current value: '+value;
+          }
+        });
+</script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
+<script type="text/javascript" src="./bootstrap/js/bootstrap-slider.js"></script>
+<script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script>
+    $('.form_datetime').datetimepicker({
+        //language:  'fr',
+        weekStart: 1,
+        todayBtn:  1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1
+    });
+</script>
 </body>
 </html>
