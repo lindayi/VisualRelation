@@ -18,7 +18,7 @@
     <style>
 
 .node {
-/*  stroke: #fff;
+  /*stroke: #000;
   stroke-width: 1.5px;*/
 }
 
@@ -34,7 +34,7 @@ text {
   pointer-events: none;
 /*  font: 12px normal;*/
   font:  12px normal "宋体",Arial,Times;
-  fill:  white;
+  fill:  #fff;
 }
 
 .black_overlay{
@@ -67,7 +67,7 @@ text {
 </style>
 </head>
 
-<body style="background-color:#000;">
+<body style="background-color:#fff;">
 
 <!-- 导航 -->
 <div class="container">
@@ -117,7 +117,7 @@ text {
   <div class="row-fluid">
     <div class="span9">
       <graph></graph>
-      <script src="http://d3js.org/d3.v3.min.js"></script>
+      <script src="./d3.min.js"></script>
       <script>
 
       var width = 800,
@@ -127,7 +127,6 @@ text {
 
       var force = d3.layout.force().linkDistance(30).linkStrength(2).charge(-30).size([width, height]);
 
-      var svg = d3.select("graph").append("svg").attr("width", "100%").attr("height", "100%").attr("padding-top","40px");
 
       // 背景
       //d3.select("body").transition().style("background-color", "grey");
@@ -142,6 +141,7 @@ text {
               dataType: "JSON",
       	    async: false,
       	    success: function(res) {
+                  var svg = d3.select("graph").append("svg").attr("width", "100%").attr("height", "100%").attr("padding-top","40px");
                   graph = res;
                   draw(graph);
       	    }
@@ -217,6 +217,7 @@ text {
                           .attr("dx", 12)
                           .attr("dy",".35em")
                           .attr("class","text")
+                          .style("fill", "black")
                           .text(function(d) {
                           return d.name
                         });
@@ -233,6 +234,10 @@ text {
                         });
       }
       getdata();
+      function update() {
+        d3.select("svg").remove();
+        getdata();
+      }
       </script>
     </div>
     <div class="span3">
@@ -247,7 +252,7 @@ text {
                       <p>开发中…</p>
                     </div>
                     <div class="modal-footer">
-                      <button id="filter" class="btn btn-primary" onclick=getdata()>筛选</button>
+                      <button id="filter" class="btn btn-primary" onclick=update()>筛选</button>
                     </div>
           </div>
         </div>
