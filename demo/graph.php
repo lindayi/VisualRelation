@@ -5,7 +5,6 @@
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">
-  <link href="./bootstrap/css/slider.css" rel="stylesheet">
   <link href="./bootstrap/css/datetimepicker.css" rel="stylesheet" media="screen">
     
 	<style type="text/css">
@@ -19,7 +18,7 @@
     <style>
 
 .node {
-/*  stroke: #fff;
+/*stroke: #fff;
   stroke-width: 1.5px;*/
 }
 
@@ -263,9 +262,10 @@ text {
                     </div>
                   </div>
                 </div>
-                <!--<div class="control-group">
-                  <input type="text" class="span2" value="4" id="sl1">
-                </div>-->
+                <div class="control-group">
+                  点数：
+                  <input id="num" name="num" type="range" step="50" min="50" max="300" value="100" /><numtext>100</numtext>
+                </div>
                 <div class="control-group">
                   <div class="span6">
                   关系展示:
@@ -282,7 +282,7 @@ text {
                 </div>
                 <div class="control-group">
                   起始时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="dd MM yyyy - HH:ii p" data-link-field="Tstart" data-picker-position="bottom-left">
+                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-link-field="Tstart" data-picker-position="bottom-left">
                       <input class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
@@ -290,7 +290,7 @@ text {
                 </div>
                 <div class="control-group">
                   终止时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="dd MM yyyy - HH:ii p" data-link-field="Tend" data-picker-position="bottom-left">
+                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-link-field="Tend" data-picker-position="bottom-left">
                       <input class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
@@ -328,7 +328,6 @@ text {
 </script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
-<script type="text/javascript" src="./bootstrap/js/bootstrap-slider.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
 <script>
@@ -340,7 +339,12 @@ text {
         todayHighlight: 1,
         startView: 2,
         forceParse: 0,
-        showMeridian: 1
+        showMeridian: 1,
+    });
+
+    $("#num").on("change",function(){
+      var val = $("#num").val();
+      $("numtext").html(val);
     });
 </script>
 </body>
