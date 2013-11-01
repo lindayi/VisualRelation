@@ -18,7 +18,7 @@
     <style>
 
 .node {
-/*stroke: #fff;
+/*  stroke: #fff;
   stroke-width: 1.5px;*/
 }
 
@@ -211,7 +211,7 @@ text {
                         .style("fill", function(d) {
                     //      console.log(d);
                     //      return color(d.group);
-                          return color(d.group+"")
+                          return "#66CCFF"
                         });
 
           node.append("text")
@@ -248,17 +248,17 @@ text {
                 <div class="control-group">
                   <div class="span4">
                     <div id="per_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="人物">
-                      <input type="checkbox" checked />
+                      <input type="checkbox" name="per" checked />
                     </div>
                   </div>
                   <div class="span4">
                     <div id="loc_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="地点">
-                      <input type="checkbox" checked />
+                      <input type="checkbox" name="loc" checked />
                     </div>
                   </div>
                   <div class="span4">
                     <div id="org_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="组织">
-                      <input type="checkbox" checked />
+                      <input type="checkbox" name="org" checked />
                     </div>
                   </div>
                 </div>
@@ -270,28 +270,28 @@ text {
                   <div class="span6">
                   关系展示:
                   <div id="tree_graph" class="make-switch switch-small" data-on-label="图状" data-off-label="树状" data-on="primary" data-off="primary">
-                    <input type="checkbox" checked />
+                    <input type="checkbox" name="graph" checked />
                   </div>
                   </div>
                   <div class="span6">
                   共存关系:
                   <div id="tree_switch" class="make-switch switch-small" data-on-label="显示" data-off-label="过滤" data-on="primary" data-off="primary">
-                    <input type="checkbox" checked />
+                    <input type="checkbox" name="coexist" checked />
                   </div>
                   </div>
                 </div>
                 <div class="control-group">
                   起始时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-link-field="Tstart" data-picker-position="bottom-left">
-                      <input class="span10" size="16" type="text" value="" readonly>
+                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
+                      <input name="tstart" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
                   <input type="hidden" id="Tstart" value="" /><br/>
                 </div>
                 <div class="control-group">
                   终止时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-link-field="Tend" data-picker-position="bottom-left">
-                      <input class="span10" size="16" type="text" value="" readonly>
+                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
+                      <input name="tend" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
                   <input type="hidden" id="Tend" value="" /><br/>
@@ -310,7 +310,7 @@ text {
             <div class="modal-header">
               <h3>属性</h3>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="height:100px; overflow:auto">
               <p>开发中…</p>
             </div>
           </div>
@@ -319,13 +319,6 @@ text {
     </div>
   </div>
 </div>
-<script>
-        $('#sl1').slider({
-          formater: function(value) {
-            return 'Current value: '+value;
-          }
-        });
-</script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
