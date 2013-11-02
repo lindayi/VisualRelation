@@ -6,6 +6,8 @@
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">
   <link href="./bootstrap/css/datetimepicker.css" rel="stylesheet" media="screen">
+  <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+  <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
 	<style type="text/css">
 	body {
 		padding-top: 40px;
@@ -190,7 +192,7 @@ text {
               <h3>属性</h3>
             </div>
             <div class="modal-body" style="height:100px; overflow:auto">
-              <p>开发中…</p>
+              <p id="nodeinfo"></p>
             </div>
           </div>
         </div>
@@ -198,7 +200,16 @@ text {
     </div>
   </div>
 </div>
-
+<div id="process-scroll" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="process-scrollLabel" aria-hidden="true">
+  <div class="modal-header">
+    正在渲染请稍等...
+  </div>
+  <div class="modal-body">
+    <div class="progress progress-striped active">
+      <div class="bar" style="width: 100%;"> </div>
+    </div>
+  </div>  
+</div>
 <script src="./bootstrap/js/d3.v3.min.js"></script>
 <script>
 
@@ -214,26 +225,41 @@ var svg = d3.select("graph").append("svg").attr("width", width).attr("height", h
 // 背景
 //d3.select("body").transition().style("background-color", "grey");
 </script>
-<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
 <script>
+function getid()
+{
+  var url = window.location.search;
 
-function getdata() {
-    var graph = {};
-    $.ajax({
-      url: "getData2.php",
-      type: "GET",
-        dataType: "JSON",
-      async: true,
-      success: function(res) {
-            d3.select("svg").remove();
-            var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
-            graph = res;
-            draw(graph);
-            console.log(res);
-      }
-    });
+  var param = url.split('?')[1];
+  var param1= param.split('&')[0];
+  
+  return param1.split('=')[1];
 }
-
+function getnodeinfo(id){
+  //console.log(d.name);
+  $.ajax({
+    url: "getNodeInfo.php",
+    type: "GET",
+    dataType: "JSON",
+    data: {"id": id},
+    success: function(data) {
+      //console.log(data[1]);
+      console.log(data.length);
+      var msg = "";
+      var line = "";
+      for (var i = 0; i < data.length; i++) {                          
+        for (var j in data[i]) {
+          // console.log(j);
+          // console.log(data[i][j]);
+          line = j + ":"+ data[i][j] + "<br />";
+        } 
+        msg += line;
+      }
+      console.log(msg);
+      $('#nodeinfo').html(msg);
+    }
+  });
+}
 function draw(graph) {
     var nodes = graph.nodes.slice(),
        links = [],
@@ -280,18 +306,16 @@ function draw(graph) {
     var node = svg.selectAll(".node").data(graph.nodes)
                       .enter().append("g")
                       .attr("class", "node")
-                      .attr("onclick", function(d){})
+                      //.attr("onclick", function(d){
+                      .on("click", function(d){
+                        getnodeinfo(d.id);
+                      })
                       .call(force.drag);
 
                   //小圆   2.5-7.5
                   node.append("circle").attr("class", "node")
                   .attr("r", function(d){
                     console.log(d.mention/2)
-                    // if(d.mention/2<2){
-                    //   return 2.5;
-                    // }else{
-                    //   return d.mention/2;
-                    // }
                     if (d.mention > 100) {
                       return 10;
                     } else if (d.mention < 5){
@@ -304,7 +328,8 @@ function draw(graph) {
               //      console.log(d);
               //      return color(d.group);
                     return color(d.type);
-                  });
+                  })
+                  .bind;
 
     node.append("text")
                     .attr("dx", 12)
@@ -337,23 +362,18 @@ function filter()
   var coexist = $("#coexist").attr("checked") == "checked"? "1": "0";
   var tstart  = $("tstart").attr("value") != undefined ? $("tstart").attr("value"): "";
   var tend    = $("#tend").attr("value") != undefined ? $("#tend").attr("value"): "";
-  //var id      = <?php echo $_GET["id"];?>;
+  var id      = getid();
+  // console.log(per);
+  // console.log(loc);
+  // console.log(org);
+  // console.log(num);
+  // console.log(graph);
+  // console.log(coexist);
+  // console.log(tstart);
+  // console.log(tend);
+  // console.log(id);
 
-  var url = window.location.search;
-
-  var param = url.split('?')[1];
-  var param1= param.split('&')[0];
-  var id  = param1.split('=')[1];
-  console.log(per);
-  console.log(loc);
-  console.log(org);
-  console.log(num);
-  console.log(graph);
-  console.log(coexist);
-  console.log(tstart);
-  console.log(tend);
-  console.log(id);
-
+  $('#process-scroll').modal('show');
   $.ajax({
     url: "getData2.php",
     type: "GET",
@@ -371,6 +391,7 @@ function filter()
     },
     //async: false,
     success: function(data) {
+      $('#process-scroll').modal('hide');
       d3.select("svg").remove();
       svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
       graph = data;
@@ -379,7 +400,8 @@ function filter()
   });
 
 }
-      filter();
+filter();
+getnodeinfo(getid());
 </script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
