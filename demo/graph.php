@@ -104,7 +104,7 @@ text {
 					</ul>
 
 					<form class="navbar-search pull-right" action="findid.php" method="get">
-						<input type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
+						<input id="keyword" type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
             <div id="mySwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
 						  <input type="checkbox" checked />
 						</div>
@@ -235,7 +235,18 @@ function getid()
   
   return param1.split('=')[1];
 }
-function getnodeinfo(id){
+function getkeyword()
+{
+  // var url = window.location.search;
+
+  // var param = url.split('?')[1];
+  // var param2= param.split('&')[1];
+
+  // return param2.split('=')[1]; 
+
+  return $('#keyword').attr("placeholder");
+}
+function getnodeinfo(id, name){
   //console.log(d.name);
   $.ajax({
     url: "getNodeInfo.php",
@@ -247,11 +258,11 @@ function getnodeinfo(id){
       console.log(data.length);
       var msg = "";
       var line = "";
+
+      msg = "<h4>" + name + "</h4>"; 
       for (var i = 0; i < data.length; i++) {                          
         for (var j in data[i]) {
-          // console.log(j);
-          // console.log(data[i][j]);
-          line = j + ":"+ data[i][j] + "<br />";
+          line = "<strong>" + j + "</strong>" + ":"+ data[i][j] + "<br />";
         } 
         msg += line;
       }
@@ -308,11 +319,11 @@ function draw(graph) {
                       .attr("class", "node")
                       //.attr("onclick", function(d){
                       .on("click", function(d){
-                        getnodeinfo(d.id);
+                        getnodeinfo(d.id, d.name);
                       })
                       .call(force.drag);
 
-                  //小圆   2.5-7.5
+                  //小圆   2.5-7.50
                   node.append("circle").attr("class", "node")
                   .attr("r", function(d){
                     console.log(d.mention/2)
@@ -401,7 +412,7 @@ function filter()
 
 }
 filter();
-getnodeinfo(getid());
+getnodeinfo(getid(), getkeyword());
 </script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
