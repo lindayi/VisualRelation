@@ -6,7 +6,6 @@
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">
   <link href="./bootstrap/css/datetimepicker.css" rel="stylesheet" media="screen">
-    
 	<style type="text/css">
 	body {
 		padding-top: 40px;
@@ -117,124 +116,6 @@ text {
   <div class="row-fluid">
     <div class="span9">
       <graph></graph>
-      <script src="./bootstrap/js/d3.v3.min.js"></script>
-      <script>
-
-      var width = document.body.clientWidth - 400,
-          height = document.documentElement.clientHeight - 90;
-
-      var color = d3.scale.category20();
-
-      var force = d3.layout.force().linkDistance(30).linkStrength(2).charge(-30).size([width, height]);
-
-      var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
-
-      // 背景
-      //d3.select("body").transition().style("background-color", "grey");
-      </script>
-      <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
-      <script>
-
-      function getdata() {
-          var graph = {};
-          $.ajax({
-      	    url: "getData.php",
-      	    type: "GET",
-              dataType: "JSON",
-      	    async: false,
-      	    success: function(res) {
-                  graph = res;
-                  draw(graph);
-      	    }
-          });
-      }
-
-      function draw(graph) {
-          var nodes = graph.nodes.slice(),
-          	 links = [],
-              bilinks = [];
-
-          graph.links.forEach(function(link) {
-            var s = nodes[link.source],
-          		t = nodes[link.target],
-          		i = {}; // intermediate node
-              v = link.value;
-          	nodes.push(i);
-          	links.push({
-          		source: s,
-          		target: i
-          	}, {
-          		source: i,
-          		target: t
-          	});
-          	bilinks.push([s, i, t ,v ]);
-          });
-
-          force.nodes(nodes).links(links).start();
-
-          var link = svg.selectAll(".link").data(bilinks)
-                            .enter().append("path")
-                            .attr("class","link")
-                            .style("stroke", function(d) { 
-                              //console.log(d);
-                              if(d[3] != null) { 
-                                if(d[3] == "1"){
-                                //  console.log(d[3]);
-                                  return color("1");
-                                }else if(d[3] == "2"){
-                                  return color("2");
-                                }else if(d[3] == "3"){
-                                  return color("3");
-                                }else return color("4");
-                              }; 
-                            })
-          		              .style("stroke-width",1.5);
-        
-
-
-          var node = svg.selectAll(".node").data(graph.nodes)
-                            .enter().append("g")
-                            .attr("class", "node")
-          				          .attr("onclick", function(d){})
-                            .call(force.drag);
-
-                        //小圆   2.5-7.5
-                        node.append("circle").attr("class", "node")
-                        .attr("r", function(d){
-                          console.log(d.count/2)
-                          if(d.count/2<2){
-                            return 2.5;
-                          }else{
-                            return d.count/2;
-                          }
-                        })              
-                        .style("fill", function(d) {
-                    //      console.log(d);
-                    //      return color(d.group);
-                          return "#66CCFF"
-                        });
-
-          node.append("text")
-                          .attr("dx", 12)
-                          .attr("dy",".35em")
-                          .attr("class","text")
-                          .text(function(d) {
-                          return d.name
-                        });
-
-          force.on("tick", function() {
-                          link.attr("d", function(d) {
-                            return "M" + d[0].x + "," + d[0].y + "S"
-                                + d[1].x + "," + d[1].y + " "
-                                + d[2].x + "," + d[2].y;
-                          });
-                          node.attr("transform",function(d) {
-                            return "translate(" + d.x + "," + d.y + ")";
-                          });
-                        });
-      }
-      getdata();
-      </script>
     </div>
     <div class="span3">
       <div class="row" style="padding-top:40px">
@@ -244,21 +125,21 @@ text {
               <h3>筛选</h3>
             </div>
             <div class="modal-body">
-              <form class="form-horizontal" action="getData.php" method="get">
+              <form class="form-horizontal">
                 <div class="control-group">
                   <div class="span4">
                     <div id="per_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="人物">
-                      <input type="checkbox" name="per" checked />
+                      <input id="per" type="checkbox" name="per" checked />
                     </div>
                   </div>
                   <div class="span4">
                     <div id="loc_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="地点">
-                      <input type="checkbox" name="loc" checked />
+                      <input id="loc" type="checkbox" name="loc" checked />
                     </div>
                   </div>
                   <div class="span4">
                     <div id="org_switch" class="make-switch switch-small" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>" data-text-label="组织">
-                      <input type="checkbox" name="org" checked />
+                      <input id="org" type="checkbox" name="org" checked />
                     </div>
                   </div>
                 </div>
@@ -270,23 +151,22 @@ text {
                   <div class="span6">
                   关系展示:
                   <div id="tree_graph" class="make-switch switch-small" data-on-label="图状" data-off-label="树状" data-on="primary" data-off="primary">
-                    <input type="checkbox" name="graph" checked />
+                    <input id="graph" type="checkbox" name="graph" checked />
                   </div>
                   </div>
                   <div class="span6">
                   共存关系:
                   <div id="tree_switch" class="make-switch switch-small" data-on-label="显示" data-off-label="过滤" data-on="primary" data-off="primary">
-                    <input type="checkbox" name="coexist" checked />
+                    <input id="coexist" type="checkbox" name="coexist" checked />
                   </div>
                   </div>
                 </div>
                 <div class="control-group">
                   起始时间：
                   <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
-                      <input name="tstart" class="span10" size="16" type="text" value="" readonly>
+                      <input id="tstart" name="tstart" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
-                  <input type="hidden" id="Tstart" value="" /><br/>
                 </div>
                 <div class="control-group">
                   终止时间：
@@ -294,12 +174,11 @@ text {
                       <input name="tend" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
-                  <input type="hidden" id="Tend" value="" /><br/>
                 </div>
               </form>
             </div>
             <div class="modal-footer">
-              <button id="filter" class="btn btn-primary" onclick=getdata()>筛选</button>
+              <button id="filter" class="btn btn-primary" onclick="filter()">筛选</button>
             </div>
           </div>
         </div>
@@ -319,7 +198,189 @@ text {
     </div>
   </div>
 </div>
-<script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
+
+<script src="./bootstrap/js/d3.v3.min.js"></script>
+<script>
+
+var width = document.body.clientWidth - 400,
+    height = document.documentElement.clientHeight - 90;
+
+var color = d3.scale.category20();
+
+var force = d3.layout.force().linkDistance(70).linkStrength(2).charge(-30).size([width, height]);
+
+var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
+
+// 背景
+//d3.select("body").transition().style("background-color", "grey");
+</script>
+<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+<script>
+
+function getdata() {
+    var graph = {};
+    $.ajax({
+      url: "getData2.php",
+      type: "GET",
+        dataType: "JSON",
+      async: true,
+      success: function(res) {
+            d3.select("svg").remove();
+            var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
+            graph = res;
+            draw(graph);
+            console.log(res);
+      }
+    });
+}
+
+function draw(graph) {
+    var nodes = graph.nodes.slice(),
+       links = [],
+        bilinks = [];
+
+    graph.links.forEach(function(link) {
+      var s = nodes[link.source],
+        t = nodes[link.target],
+        i = {}, 
+        w = link.weight,
+        tp = nodes[link.target].type;
+      nodes.push(i);
+      links.push({
+        source: s,
+        target: i
+      }, {
+        source: i,
+        target: t
+      });
+      bilinks.push([s, i, t ,w ,tp]);
+    });
+
+    force.nodes(nodes).links(links).start();
+
+    var link = svg.selectAll(".link").data(bilinks)
+                      .enter().append("path")
+                      .attr("class","link")
+                      .style("stroke", function(d) { 
+                        console.log(d);
+                        return color(d[4]);
+                      })
+                      .style("stroke-width", function (d) {
+                        if (d[3] > 100) {
+                          return 2;
+                        } else if (d[3] < 10) {
+                          return 1;
+                        } else {
+                          return 1.5;
+                        }
+                      });
+  
+
+
+    var node = svg.selectAll(".node").data(graph.nodes)
+                      .enter().append("g")
+                      .attr("class", "node")
+                      .attr("onclick", function(d){})
+                      .call(force.drag);
+
+                  //小圆   2.5-7.5
+                  node.append("circle").attr("class", "node")
+                  .attr("r", function(d){
+                    console.log(d.mention/2)
+                    // if(d.mention/2<2){
+                    //   return 2.5;
+                    // }else{
+                    //   return d.mention/2;
+                    // }
+                    if (d.mention > 100) {
+                      return 10;
+                    } else if (d.mention < 5){
+                      return d.mention;
+                    } else {
+                      return 5;
+                    }
+                  })              
+                  .style("fill", function(d) {
+              //      console.log(d);
+              //      return color(d.group);
+                    return color(d.type);
+                  });
+
+    node.append("text")
+                    .attr("dx", 12)
+                    .attr("dy",".35em")
+                    .attr("class","text")
+                    .text(function(d) {
+                    return d.name
+                  });
+
+    force.on("tick", function() {
+                    link.attr("d", function(d) {
+                      return "M" + d[0].x + "," + d[0].y + "S"
+                          + d[1].x + "," + d[1].y + " "
+                          + d[2].x + "," + d[2].y;
+                    });
+                    node.attr("transform",function(d) {
+                      return "translate(" + d.x + "," + d.y + ")";
+                    });
+                  });
+}
+//getdata();
+
+function filter()
+{
+  var per     = $('#per').attr("checked") == "checked"? "1": "0";
+  var loc     = $('#loc').attr("checked") == "checked"? "1": "0";
+  var org     = $('#org').attr("checked") == "checked"? "1": "0";
+  var num     = $('#num').attr("value");
+  var graph   = $("#graph").attr("checked") == "checked"? "1": "0";
+  var coexist = $("#coexist").attr("checked") == "checked"? "1": "0";
+  var tstart  = $("tstart").attr("value") != undefined ? $("tstart").attr("value"): "";
+  var tend    = $("#tend").attr("value") != undefined ? $("#tend").attr("value"): "";
+  //var id      = <?php echo $_GET["id"];?>;
+
+  var url = window.location.search;
+
+  var param = url.split('?')[1];
+  var param1= param.split('&')[0];
+  var id  = param1.split('=')[1];
+  console.log(per);
+  console.log(loc);
+  console.log(org);
+  console.log(num);
+  console.log(graph);
+  console.log(coexist);
+  console.log(tstart);
+  console.log(tend);
+  console.log(id);
+
+  $.ajax({
+    url: "getData2.php",
+    type: "GET",
+    dataType: "JSON",
+    data: {
+      "id": id,
+      "per": per,
+      "loc": loc,
+      "org": org,
+      "num": num,
+      "graph": graph,
+      "coexist": coexist,
+      "tstart": tstart,
+      "tend": tend,
+    },
+    //async: false,
+    success: function(data) {
+      d3.select("svg").remove();
+      svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
+      graph = data;
+      draw(graph);
+    }
+  });
+
+}
+      filter();
+</script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
@@ -340,5 +401,6 @@ text {
       $("numtext").html(val);
     });
 </script>
+
 </body>
 </html>
