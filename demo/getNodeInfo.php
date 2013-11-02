@@ -27,59 +27,66 @@
 
 	$pkey = 3;
 
-	$sqlquery = "SELECT * FROM relation WHERE sourceid=".$id." AND destid=0";
+	$sqlquery = "SELECT DISTINCT type, ne FROM relation WHERE sourceid=".$id." AND destid=0 AND type not like 'CeMODIFIERS'";
 	$result = mysql_query($sqlquery, $conn);
 	while($row = mysql_fetch_array($result))
 	{
 		switch ($row["type"]) {
 			case "CePerPOSITION":
-				$key[$pkey] = "职位"
+				$key[$pkey] = "职位";
 				break;
 			case "CeALIASES":
-				$key[$pkey] = "别名"
+				$key[$pkey] = "别名";
 				break;
 			case "CePerTITLE":
-				$key[$pkey] = "头衔"
+				$key[$pkey] = "头衔";
 				break;
 			case "CeAGE":
-				$key[$pkey] = "年龄"
+				$key[$pkey] = "年龄";
 				break;
 			case "CePerCOLLEAGUES_R":
-				$key[$pkey] = "同事"
+				$key[$pkey] = "同事";
 				break;
 			case "CePerBIRTHTIME":
-				$key[$pkey] = "出生时间"
+				$key[$pkey] = "出生时间";
 				break;
 			case "CeXWHERE_FROM_OF":
-				$key[$pkey] = "其来自于"
+				$key[$pkey] = "其来自于";
 				break;
 			case "CeOrgSTAFF":
-				$key[$pkey] = "职员"
+				$key[$pkey] = "职员";
 				break;
 			case "CePerAFFILIATION":
-				$key[$pkey] = "工作单位"
+				$key[$pkey] = "工作单位";
 				break;
 			case "CePerDEGREES":
-				$key[$pkey] = "学位"
+				$key[$pkey] = "学位";
 				break;
 			case "CePerPARENTS":
-				$key[$pkey] = "父母"
+				$key[$pkey] = "父母";
 				break;
 			case "CePerCHILDREN":
-				$key[$pkey] = "子女"
+				$key[$pkey] = "子女";
 				break;
 			case "CeXBIRTHPLACE_OF":
-				$key[$pkey] = "其出生地"
+				$key[$pkey] = "其出生地";
 				break;
 			case "CePerSIBLINGS_R":
-				$key[$pkey] = "兄弟姐妹"
+				$key[$pkey] = "兄弟姐妹";
 				break;
 			
 			default:
-				continue;
+				$key[$pkey] = $row["type"];
 				break;
 		}
 		$value[$pkey] = $row["ne"];
 		$pkey++;
 	}
+
+	$info = array();
+	for ($i = 0; $i < $pkey ;$i++) {
+		$item = array($key[$i]=>$value[$i]);
+		array_push($info, $item);
+	}
+	echo json_encode($info);
 ?>
