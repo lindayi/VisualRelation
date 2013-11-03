@@ -226,6 +226,24 @@ var svg = d3.select("graph").append("svg").attr("width", width).attr("height", h
 //d3.select("body").transition().style("background-color", "grey");
 </script>
 <script>
+// rescale g
+function rescale() {
+  trans=d3.event.translate;
+  scale=d3.event.scale;
+
+  vis.attr("transform",
+      "translate(" + trans + ")"
+      + " scale(" + scale + ")");
+}
+function judgeWidth(mentions) {
+  if (mentions > 100) {
+    return 2;
+  } else if (mentions < 10) {
+    return 1;
+  } else {
+    return 1.5;
+  }
+}
 function getid()
 {
   var url = window.location.search;
@@ -235,15 +253,9 @@ function getid()
   
   return param1.split('=')[1];
 }
+//get keyword from search frame' placeholder
 function getkeyword()
 {
-  // var url = window.location.search;
-
-  // var param = url.split('?')[1];
-  // var param2= param.split('&')[1];
-
-  // return param2.split('=')[1]; 
-
   return $('#keyword').attr("placeholder");
 }
 function getnodeinfo(id, name){
@@ -271,6 +283,25 @@ function getnodeinfo(id, name){
     }
   });
 }
+function getlinkinfo(source, target) {
+  console.log(source);
+  console.log(target);
+  $.ajax({
+    url: "getLinkInfo.php",
+    type: "GET",
+    dataType: "JSON",
+    data: {
+      "source": source,
+      "target": target
+    },
+    success: function (data) {
+      var msg = "";
+      var line = "";
+     // console.log(data);
+    }
+  });
+}
+
 function draw(graph) {
     var nodes = graph.nodes.slice(),
        links = [],
@@ -298,24 +329,31 @@ function draw(graph) {
     var link = svg.selectAll(".link").data(bilinks)
                       .enter().append("path")
                       .attr("class","link")
+                      .attr('id', function(d){return d[2]['id'];})
                       .style("stroke", function(d) { 
-                        console.log(d);
+                        //console.log(d);
                         return color(d[4]);
                       })
                       .style("stroke-width", function (d) {
-                        if (d[3] > 100) {
-                          return 2;
-                        } else if (d[3] < 10) {
-                          return 1;
-                        } else {
-                          return 1.5;
-                        }
+                        return judgeWidth(d[3]);
+                      })
+                      .on("mouseover", function(d) {                        
+                        $(this).css("stroke-width", "5px");
+                      })
+                      .on("mouseout", function(d) {
+                        $(this).css("stroke-width", judgeWidth(d[3]));                    
+                      })
+                      .on("click", function(d) {
+                        console.log(d[0].id);
+                        console.log(d[2].id);
+                        getlinkinfo(d[0].id, d[2].id);
                       });
   
 
 
     var node = svg.selectAll(".node").data(graph.nodes)
                       .enter().append("g")
+                      .call(d3.behavior.zoom().on("zoom", rescale))
                       .attr("class", "node")
                       //.attr("onclick", function(d){
                       .on("click", function(d){
@@ -326,11 +364,11 @@ function draw(graph) {
                   //小圆   2.5-7.50
                   node.append("circle").attr("class", "node")
                   .attr("r", function(d){
-                    console.log(d.mention/2)
+                    //console.log(d.mention/2)
                     if (d.mention > 100) {
                       return 10;
                     } else if (d.mention < 5){
-                      return d.mention;
+                      return d.mention < 2.5 ? 2.5: d.mention;
                     } else {
                       return 5;
                     }
