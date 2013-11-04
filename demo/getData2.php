@@ -61,7 +61,7 @@
 		array_push($nodes, $node);
 	}
 
-	if($graph)
+	if($graph && ($pnode > 1))
 	{
 		$sqlquery = "SELECT DISTINCT sourceid, destid, type FROM relation WHERE sourceid in (".$nodeid[1];
 		for($i = 2; $i < $pnode; $i++)
