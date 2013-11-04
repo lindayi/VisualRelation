@@ -11,8 +11,8 @@
 	$tend = $_GET['tend'];
 
 	$clockstart = microtime();
-	
-	$sqlquery = "SELECT DISTINCT relation.destid, relation.type rtype, relation.ne, profile.profiletype ptype, profile.mentions FROM relation, profile WHERE relation.sourceid=".$id." AND relation.destid!=0 ";
+
+	$sqlquery = "SELECT DISTINCT relation.destid, relation.type rtype, profile.profilename, profile.profiletype ptype, profile.mentions FROM relation, profile WHERE relation.sourceid=".$id." AND relation.destid!=0 ";
 	if(!$coexist) $sqlquery = $sqlquery."AND relation.type not like 'CeCoexist%' ";
 	if($tstart != "") $sqlquery = $sqlquery."AND relation.realtime > ".$tstart."00 ";
 	if($tend != "") $sqlquery = $sqlquery."AND relation.realtime < ".$tend."00 ";
@@ -37,7 +37,7 @@
 	{
 		if($row["destid"] == $nodeid[$pnode - 1]) continue;
 		$nodeid[$pnode] = $row["destid"];
-		$nodename[$pnode] = $row["ne"];
+		$nodename[$pnode] = $row["profilename"];
 		$nodetype[$pnode] = $row["ptype"];
 		$nodemention[$pnode] = $row["mentions"];
 		$pnode++;
@@ -61,7 +61,7 @@
 		array_push($nodes, $node);
 	}
 
-	if($graph)
+	if($graph && ($pnode > 1))
 	{
 		$sqlquery = "SELECT DISTINCT sourceid, destid, type FROM relation WHERE sourceid in (".$nodeid[1];
 		for($i = 2; $i < $pnode; $i++)

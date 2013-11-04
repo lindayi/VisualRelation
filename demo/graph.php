@@ -104,7 +104,7 @@ text {
 					</ul>
 
 					<form class="navbar-search pull-right" action="findid.php" method="get">
-						<input type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
+						<input id="keyword" type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
             <div id="mySwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
 						  <input type="checkbox" checked />
 						</div>
@@ -165,14 +165,14 @@ text {
                 </div>
                 <div class="control-group">
                   起始时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
-                      <input id="tstart" name="tstart" class="span10" size="16" type="text" value="" readonly>
+                  <div id="tstart" class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
+                      <input name="tstart" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
                 </div>
                 <div class="control-group">
                   终止时间：
-                  <div class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
+                  <div id="tend" class="input-append date form_datetime" data-date="" data-date-format="yyyymmddhhii" data-picker-position="bottom-left">
                       <input name="tend" class="span10" size="16" type="text" value="" readonly>
                       <span class="add-on"><i class="icon-th"></i></span>
                   </div>
@@ -226,6 +226,27 @@ var svg = d3.select("graph").append("svg").attr("width", width).attr("height", h
 //d3.select("body").transition().style("background-color", "grey");
 </script>
 <script>
+
+
+
+// rescale g
+function rescale() {
+  trans=d3.event.translate;
+  scale=d3.event.scale;
+
+  vis.attr("transform",
+      "translate(" + trans + ")"
+      + " scale(" + scale + ")");
+}
+function judgeWidth(mentions) {
+  if (mentions > 100) {
+    return 2;
+  } else if (mentions < 10) {
+    return 1;
+  } else {
+    return 1.5;
+  }
+}
 function getid()
 {
   var url = window.location.search;
@@ -235,23 +256,26 @@ function getid()
   
   return param1.split('=')[1];
 }
-function getnodeinfo(id){
-  //console.log(d.name);
+//get keyword from search frame' placeholder
+function getkeyword()
+{
+  return $('#keyword').attr("placeholder");
+}
+function getnodeinfo(id, name){
   $.ajax({
     url: "getNodeInfo.php",
     type: "GET",
     dataType: "JSON",
     data: {"id": id},
     success: function(data) {
-      //console.log(data[1]);
       console.log(data.length);
       var msg = "";
       var line = "";
+
+      msg = "<h4>" + name + "</h4>"; 
       for (var i = 0; i < data.length; i++) {                          
         for (var j in data[i]) {
-          // console.log(j);
-          // console.log(data[i][j]);
-          line = j + ":"+ data[i][j] + "<br />";
+          line = "<strong>" + j + "</strong>" + ":"+ data[i][j] + "<br />";
         } 
         msg += line;
       }
@@ -260,6 +284,30 @@ function getnodeinfo(id){
     }
   });
 }
+function getlinkinfo(source, target) {
+  $.ajax({
+    url: "getLinkInfo.php",
+    type: "GET",
+    dataType: "JSON",
+    data: {
+      "source": source,
+      "target": target
+    },
+    success: function (data) {
+      var msg = "";
+      var line = "";
+
+      msg += "<strong>关系类型:</strong>" + data.type + "<br />";
+
+      for (var i = 0; i < data.sources.length; i++) {
+        line += "<strong>关系来源：(" + (i+1) +")</strong>" + data.sources[i].text + "<br />";
+      }
+      msg += line;
+      $('#nodeinfo').html(msg);
+    }
+  });
+}
+
 function draw(graph) {
     var nodes = graph.nodes.slice(),
        links = [],
@@ -287,46 +335,51 @@ function draw(graph) {
     var link = svg.selectAll(".link").data(bilinks)
                       .enter().append("path")
                       .attr("class","link")
+                      .attr('id', function(d){return d[2]['id'];})
                       .style("stroke", function(d) { 
-                        console.log(d);
+                        //console.log(d);
                         return color(d[4]);
                       })
                       .style("stroke-width", function (d) {
-                        if (d[3] > 100) {
-                          return 2;
-                        } else if (d[3] < 10) {
-                          return 1;
-                        } else {
-                          return 1.5;
-                        }
+                        return judgeWidth(d[3]);
+                      })
+                      .on("mouseover", function(d) {                        
+                        $(this).css("stroke-width", "5px");
+                      })
+                      .on("mouseout", function(d) {
+                        $(this).css("stroke-width", judgeWidth(d[3]));                    
+                      })
+                      .on("click", function(d) {
+                        console.log(d[0].id);
+                        console.log(d[2].id);
+                        getlinkinfo(d[0].id, d[2].id);
                       });
   
 
 
     var node = svg.selectAll(".node").data(graph.nodes)
                       .enter().append("g")
+                      .call(d3.behavior.zoom().on("zoom", rescale))
                       .attr("class", "node")
                       //.attr("onclick", function(d){
                       .on("click", function(d){
-                        getnodeinfo(d.id);
+                        getnodeinfo(d.id, d.name);
                       })
                       .call(force.drag);
 
-                  //小圆   2.5-7.5
+                  //小圆   2.5-7.50
                   node.append("circle").attr("class", "node")
                   .attr("r", function(d){
-                    console.log(d.mention/2)
+                    //console.log(d.mention/2)
                     if (d.mention > 100) {
                       return 10;
                     } else if (d.mention < 5){
-                      return d.mention;
+                      return d.mention < 2.5 ? 2.5: d.mention;
                     } else {
                       return 5;
                     }
                   })              
                   .style("fill", function(d) {
-              //      console.log(d);
-              //      return color(d.group);
                     return color(d.type);
                   })
                   .bind;
@@ -369,9 +422,9 @@ function filter()
   // console.log(num);
   // console.log(graph);
   // console.log(coexist);
-  // console.log(tstart);
-  // console.log(tend);
-  // console.log(id);
+  console.log(tstart);
+  console.log(tend);
+  //console.log(id);
 
   $('#process-scroll').modal('show');
   $.ajax({
@@ -391,17 +444,23 @@ function filter()
     },
     //async: false,
     success: function(data) {
+      console.log(data);
       $('#process-scroll').modal('hide');
       d3.select("svg").remove();
       svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
       graph = data;
+      console.log(data);
       draw(graph);
+      data = "";
+    },
+    error: function(e){
+      console.log(e);
     }
   });
 
 }
 filter();
-getnodeinfo(getid());
+getnodeinfo(getid(), getkeyword());
 </script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
@@ -416,6 +475,12 @@ getnodeinfo(getid());
         startView: 2,
         forceParse: 0,
         showMeridian: 1,
+    });
+
+    $('#tstart')
+    .datetimepicker()
+    .on('changeDate', function(ev){
+      console.log(ev.target.value);
     });
 
     $("#num").on("change",function(){

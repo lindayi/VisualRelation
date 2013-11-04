@@ -4,7 +4,7 @@
 	$result = mysql_query("SELECT profileid FROM profile where profilename like \"".$keyword."\"", $conn);
 	
 	if (!($row = mysql_fetch_array($result)))
-		echo "<script>alert(\"对不起，没有查找到 ".$name." 的数据。\"); history.back() </script>";
+		echo "<script>alert(\"对不起，没有查找到 ".$keyword." 的数据。\"); history.back() </script>";
 	
 	$id[0] = $row["profileid"];
 	if (!($row = mysql_fetch_array($result)))
