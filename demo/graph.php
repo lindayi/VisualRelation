@@ -105,7 +105,7 @@ text {
 
 					<form class="navbar-search pull-right" action="findid.php" method="get">
 						<input id="keyword" type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
-            <div id="mySwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
+            <div id="typeSwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
 						  <input type="checkbox" checked />
 						</div>
 					</form>
@@ -117,7 +117,7 @@ text {
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span9">
-      <graph></graph>
+      <graph id="vis"></graph>
     </div>
     <div class="span3">
       <div class="row" style="padding-top:40px">
@@ -200,6 +200,7 @@ text {
     </div>
   </div>
 </div>
+<!-- tips when user wating for data-->
 <div id="process-scroll" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="process-scrollLabel" aria-hidden="true">
   <div class="modal-header">
     正在渲染请稍等...
@@ -210,6 +211,19 @@ text {
     </div>
   </div>  
 </div>
+<!-- error tips when ajax error-->
+<div id="error" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="errorLabel" arria-hidden="true">
+  <div class="modal-header">
+    错误：
+  </div>
+  <div class="modal-body">
+    对不起，数据库暂无此数据 :(
+  </div>
+  <div class="modal-footer">
+    <button id="ok" class="btn" style="margin:right">确定</button>
+  </div>>
+</div>
+
 <script src="./bootstrap/js/d3.v3.min.js"></script>
 <script>
 
@@ -234,7 +248,7 @@ function rescale() {
   trans=d3.event.translate;
   scale=d3.event.scale;
 
-  vis.attr("transform",
+  $('#vis').attr("transform",
       "translate(" + trans + ")"
       + " scale(" + scale + ")");
 }
@@ -290,13 +304,13 @@ function getlinkinfo(source, target) {
     type: "GET",
     dataType: "JSON",
     data: {
-      "source": source,
-      "target": target
+      "source": source.id,
+      "target": target.id
     },
     success: function (data) {
       var msg = "";
       var line = "";
-
+      msg += "<h4>" + source.name + " → " + target.name + "</h4>";
       msg += "<strong>关系类型:</strong>" + data.type + "<br />";
 
       for (var i = 0; i < data.sources.length; i++) {
@@ -350,9 +364,10 @@ function draw(graph) {
                         $(this).css("stroke-width", judgeWidth(d[3]));                    
                       })
                       .on("click", function(d) {
-                        console.log(d[0].id);
-                        console.log(d[2].id);
-                        getlinkinfo(d[0].id, d[2].id);
+                        console.log(d[0]);
+                        console.log(d[2]);
+                        //console.log
+                        getlinkinfo(d[0], d[2]);
                       });
   
 
@@ -413,8 +428,8 @@ function filter()
   var num     = $('#num').attr("value");
   var graph   = $("#graph").attr("checked") == "checked"? "1": "0";
   var coexist = $("#coexist").attr("checked") == "checked"? "1": "0";
-  var tstart  = $("tstart").attr("value") != undefined ? $("tstart").attr("value"): "";
-  var tend    = $("#tend").attr("value") != undefined ? $("#tend").attr("value"): "";
+  var tstart  = $("#tstart").val();
+  var tend    = $("#tend").val();
   var id      = getid();
   // console.log(per);
   // console.log(loc);
@@ -425,6 +440,12 @@ function filter()
   console.log(tstart);
   console.log(tend);
   //console.log(id);
+
+
+  //judege the parameter
+  // if ((tstart >= tend) && (tstart != "") && (tend != "")) {
+  //   alert("wrong");
+  // }
 
   $('#process-scroll').modal('show');
   $.ajax({
@@ -455,6 +476,8 @@ function filter()
     },
     error: function(e){
       console.log(e);
+      $('#process-scroll').modal('hide');
+      $('#error').modal('show');
     }
   });
 
@@ -464,29 +487,80 @@ getnodeinfo(getid(), getkeyword());
 </script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
-<script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<!--<script type="text/javascript" src="./bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>-->
 <script>
-    $('.form_datetime').datetimepicker({
-        //language:  'fr',
-        weekStart: 1,
-        todayBtn:  1,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-    });
+function trans_time(obj)
+{
+  var time = "";
+  var year = obj.date.getUTCFullYear();
+  var month = obj.date.getUTCMonth() + 1;    //because getUTCMonth start from 0
+  var day = obj.date.getUTCDate();
+  var hours = obj.date.getUTCHours();
+  var minutes = obj.date.getUTCMinutes();
 
-    $('#tstart')
-    .datetimepicker()
-    .on('changeDate', function(ev){
-      console.log(ev.target.value);
-    });
+  time += year;
+  if (month < 10) {
+    time += "0" + month;
+  } else {
+    time += month;
+  }
+  if (day < 10) {
+    time += "0" + day;
+  } else {
+    time += day;
+  }
+  if (hours < 10) {
+    time += "0" + hours;
+  } else {
+    time += hours;
+  }
+  if (minutes < 10) {
+    time += "0" + minutes;
+  } else {
+    time += minutes;
+  }
+  console.log(time);
 
-    $("#num").on("change",function(){
-      var val = $("#num").val();
-      $("numtext").html(val);
-    });
+  return time;
+}
+
+$('.form_datetime').datetimepicker({
+    //language:  'fr',
+    weekStart: 1,
+    todayBtn:  1,
+    autoclose: 1,
+    todayHighlight: 1,
+    startView: 2,
+    forceParse: 0,
+    showMeridian: 1,
+});
+
+$('#tstart')
+.datetimepicker()
+.on('changeDate', function(ev){
+  console.log(trans_time(ev));
+  $('#tstart').attr("value", trans_time(ev));
+});
+
+$('#tend')
+.datetimepicker()
+.on('changeDate', function(ev){
+  console.log(trans_time(ev));
+  $('#tend').attr("value", trans_time(ev));
+});
+
+$("#num").on("change",function(){
+  var val = $("#num").val();
+  $("numtext").html(val);
+});
+
+$('#ok').on("click", function() {
+  $('#error').modal('hide');
+});
+
+$('#typeSwitch').on('switch-change', function () {
+    window.location = "timeline.php?id=" + getid();
+});
 </script>
 
 </body>
