@@ -16,43 +16,7 @@
 	}
 	</style>
 
-<script>
-	function getid()
-	{
-	  var url = window.location.search;
 
-	  var param = url.split('?')[1];
-	  var param1= param.split('&')[0];
-	  
-	  return param1.split('=')[1];
-	}
-	//get keyword from search frame' placeholder
-	function getkeyword()
-	{
-	  return $('#keyword').attr("placeholder");
-	}
-	$.ajax({
-		url: "getTimeInfo.php",
-		type: "GET",
-		dataType:"JSON",
-		async:false,
-		data: {
-			"id": getid(),
-			"keyword": getkeyword()
-		},
-		success: function(data) {
-			dataObject = data;
-		}
-	})
-
-	$(document).ready(function() {
-        createStoryJS({
-            type:       'timeline',
-            source:     dataObject,
-            embed_id:   'my-timeline'
-        });
-    });
-</script>
 </head>
 
 <body>
@@ -101,6 +65,45 @@
 		</div><!-- /navbar-inner-->
   </div><!-- /navbar-->
 </div>
+<script>
+    var dataObject;
+    function getid()
+    {
+      var url = window.location.search;
+
+      var param = url.split('?')[1];
+      var param1= param.split('&')[0];
+      
+      return param1.split('=')[1];
+    }
+    //get keyword from search frame' placeholder
+    function getkeyword()
+    {
+      return $('#keyword').attr("placeholder");
+    }
+    $.ajax({
+        url: "getTimeInfo.php",
+        type: "GET",
+        dataType:"JSON",
+        async:false,
+        data: {
+            "id": getid(),
+            "keyword": getkeyword()
+        },
+        success: function(data) {
+            dataObject = data;
+        }
+    })
+
+    $(document).ready(function() {
+        createStoryJS({
+            type:       'timeline',
+            source:     dataObject,
+            embed_id:   'my-timeline'
+        });
+    });
+</script>
+
 
 <div id="my-timeline" style="padding-top:40px; "></div>
 

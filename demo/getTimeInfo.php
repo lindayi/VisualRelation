@@ -37,7 +37,7 @@
 	$titleheadline = $titleheadline." 的时间轴";
 	$count = 0;
 
-	$sqlquery = "SELECT DISTINCT destid, ne, realtime, type FROM relation WHERE sourceid = '".$id. "' and type not in ( \"CeMODIFIERS\",\"CeXMODIFIER_OF\")";
+	$sqlquery = "SELECT DISTINCT destid, ne, relation.realtime, type, profiletype FROM relation,profile WHERE relation.sourceid = '".$id. "' and type not in ( \"CeMODIFIERS\",\"CeXMODIFIER_OF\") and destid = profileid";
 	$result = mysql_query($sqlquery);
 	$row = mysql_fetch_array($result);
 
@@ -47,8 +47,16 @@
 		$startDate[$count] = proctime($row["realtime"],0);
 		$endDate[$count] = proctime($row["realtime"],1);
 		$headline[$count] = $row["ne"];
+		$tag[$count] = $row["profiletype"];
+		if ($tag[$count] == "1") $tag[$count] = "地点";
+		if ($tag[$count] == "2") $tag[$count] = "机构";
+		if ($tag[$count] == "3") $tag[$count] = "人物";
+		
 		$text[$count] = "<p>来源：</p>";
-		//$sqlquery = "SELECT DISTINCT destid, type, text FROM relation, doc WHERE destid = ".$row["destid"]." and sourceid = ".$id." and type = ".
+		$textquery = "SELECT doc.text FROM relation, doc WHERE destid = ".$row["destid"]." and sourceid = ".$id." and type = '".$row["type"]."' and relation.doc = doc.file and relation.sentenceid = doc.sentenceid";
+		$textresult = mysql_query($textquery);
+		$textrow = mysql_fetch_array($textresult);
+		$text[$count] = $text[$count].$textrow["text"];
 		
 		$asset = array();
 		$date = array(
@@ -56,7 +64,7 @@
 			"endDate"=>$endDate[$count],
 			"headline"=>$headline[$count],
 			"text"=>$text[$count],
-			"tag"=>" ",
+			"tag"=>$tag[$count],
 			"asset"=>$asset
 			);
 		array_push($dates, $date);
