@@ -559,7 +559,7 @@ $('#ok').on("click", function() {
 });
 
 $('#typeSwitch').on('switch-change', function () {
-    window.location = "timeline.php?id=" + getid();
+    window.location = "timeline.php?id=" + getid() + "&keyword=" + getkeyword();
 });
 </script>
 
