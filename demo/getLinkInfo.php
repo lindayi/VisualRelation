@@ -20,12 +20,14 @@
      *
      */
 
-    include_once "conn.php";
+    include_once "conn.php"; 
     $source = $_GET['source'];
     $target = $_GET['target'];
+    $coexist = $_GET['coexist'];
 
     $sqlquery = "SELECT DISTINCT type, ne, text, pubtime, realtime FROM relation,doc WHERE sourceid =".$source." AND destid = ".$target." AND relation.doc = doc.file AND relation.sentenceid = doc.sentenceid";
-    
+    if(!$coexist) $sqlquery = $sqlquery." AND relation.type not like 'CeCoexist%' ";
+    //echo $sqlquery;
     $result = mysql_query($sqlquery, $conn);
     
     $row = mysql_fetch_array($result);
