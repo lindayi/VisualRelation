@@ -107,6 +107,7 @@
 						echo "	</tr> \n";
 					}
 					echo "</table>\n";
+					echo "<div style=\"padding-top:10px\"><button class=\"btn btn-large btn-info btn-block\" onclick=\"jump(".$id[$i-1].");\">检索此实体</button></div>\n";
 					echo "</div>\n";
 				}
 			?>
@@ -117,5 +118,12 @@
 
 <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
 <script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
+<script>
+function jump(id)
+{
+	window.location="graph.php?id=" + id + "&keyword=<?php echo $keyword; ?>";
+	//console.
+}
+</script>
 </body>
 </html>
