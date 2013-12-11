@@ -299,13 +299,15 @@ function getnodeinfo(id, name){
   });
 }
 function getlinkinfo(source, target) {
+  var coexist = $("#coexist").attr("checked") == "checked"? "1": "0";
   $.ajax({
     url: "getLinkInfo.php",
     type: "GET",
     dataType: "JSON",
     data: {
       "source": source.id,
-      "target": target.id
+      "target": target.id,
+      "coexist": coexist
     },
     success: function (data) {
       var msg = "";
