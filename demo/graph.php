@@ -382,7 +382,10 @@ function draw(graph) {
               } else {
                 return 5;
               }
-            })              
+            })
+            .on("click", function(d){
+                            getnodeinfo(d.id, d.name);
+                          })              
             .style("fill", function(d) {
               return color(d.type);
             })
