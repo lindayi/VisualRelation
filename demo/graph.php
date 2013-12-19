@@ -232,26 +232,9 @@ var width = document.body.clientWidth - 400,
 
 var color = d3.scale.category20();
 
-var force = d3.layout.force().linkDistance(70).linkStrength(2).charge(-30).size([width, height]);
-
-var svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
-
 // 背景
 //d3.select("body").transition().style("background-color", "grey");
-</script>
-<script>
 
-
-
-// rescale g
-function rescale() {
-  trans=d3.event.translate;
-  scale=d3.event.scale;
-
-  $('#vis').attr("transform",
-      "translate(" + trans + ")"
-      + " scale(" + scale + ")");
-}
 function judgeWidth(mentions) {
   if (mentions > 100) {
     return 2;
@@ -299,13 +282,15 @@ function getnodeinfo(id, name){
   });
 }
 function getlinkinfo(source, target) {
+  var coexist = $("#coexist").attr("checked") == "checked"? "1": "0";
   $.ajax({
     url: "getLinkInfo.php",
     type: "GET",
     dataType: "JSON",
     data: {
       "source": source.id,
-      "target": target.id
+      "target": target.id,
+      "coexist": coexist
     },
     success: function (data) {
       var msg = "";
@@ -323,6 +308,7 @@ function getlinkinfo(source, target) {
 }
 
 function draw(graph) {
+
     var nodes = graph.nodes.slice(),
        links = [],
         bilinks = [];
@@ -344,81 +330,104 @@ function draw(graph) {
       bilinks.push([s, i, t ,w ,tp]);
     });
 
-    force.nodes(nodes).links(links).start();
+   var force = d3.layout.force()
+          //.linkDistance(70)
+          .linkDistance(30)
+          .linkStrength(2)
+          //.charge(-30)
+          .charge(-60)
+          .nodes(nodes)
+          .links(links)
+          .size([width, height])
+          .start();
 
-    var link = svg.selectAll(".link").data(bilinks)
-                      .enter().append("path")
-                      .attr("class","link")
-                      .attr('id', function(d){return d[2]['id'];})
-                      .style("stroke", function(d) { 
-                        //console.log(d);
-                        return color(d[4]);
-                      })
-                      .style("stroke-width", function (d) {
+    /*直线用line,曲线用path*/
+    var link = svg.selectAll(".link")
+              .data(bilinks)
+              .enter().append("path")
+              //.enter().append("line")
+              .attr("class", "link")
+              .style("stroke", function(d) { return color(d[4]);})
+              .style("stroke-width", function (d) {
                         return judgeWidth(d[3]);
                       })
-                      .on("mouseover", function(d) {                        
-                        $(this).css("stroke-width", "5px");
-                      })
-                      .on("mouseout", function(d) {
-                        $(this).css("stroke-width", judgeWidth(d[3]));                    
-                      })
-                      .on("click", function(d) {
-                        console.log(d[0]);
-                        console.log(d[2]);
-                        //console.log
-                        getlinkinfo(d[0], d[2]);
-                      });
-  
+              .on("mouseover", function(d) {                        
+                $(this).css("stroke-width", "5px");
+              })
+              .on("mouseout", function(d) {
+                $(this).css("stroke-width", judgeWidth(d[3]));                    
+              })
+              .on("click", function(d) {
+                console.log(d[0]);
+                console.log(d[2]);
+                //console.log
+                getlinkinfo(d[0], d[2]);
+              })
+              .attr('id', function(d) { return d[2]['id'];})
+              .attr("x1", function(d) { return d[0].x; })
+              .attr("y1", function(d) { return d[0].y; })
+              .attr("x2", function(d) { return d[2].x; })
+              .attr("y2", function(d) { return d[2].y; });
 
+    var node = svg.selectAll("circle.node")
+            .data(graph.nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", function(d){
+              //console.log(d.mention/2)
+              if (d.mention > 100) {
+                return 10;
+              } else if (d.mention < 5){
+                return d.mention < 2.5 ? 2.5: d.mention;
+              } else {
+                return 5;
+              }
+            })
+            .on("click", function(d){
+                            getnodeinfo(d.id, d.name);
+                          })              
+            .style("fill", function(d) {
+              return color(d.type);
+            })
+            .call(force.drag);
 
-    var node = svg.selectAll(".node").data(graph.nodes)
-                      .enter().append("g")
-                      .call(d3.behavior.zoom().on("zoom", rescale))
-                      .attr("class", "node")
-                      //.attr("onclick", function(d){
-                      .on("click", function(d){
-                        getnodeinfo(d.id, d.name);
-                      })
-                      .call(force.drag);
+            node.append("title")
+              .text(function(d) { return d.name; });
+            node.append("text")
+              .text(function(d) { return d.name; });
 
-                  //小圆   2.5-7.50
-                  node.append("circle").attr("class", "node")
-                  .attr("r", function(d){
-                    //console.log(d.mention/2)
-                    if (d.mention > 100) {
-                      return 10;
-                    } else if (d.mention < 5){
-                      return d.mention < 2.5 ? 2.5: d.mention;
-                    } else {
-                      return 5;
-                    }
-                  })              
-                  .style("fill", function(d) {
-                    return color(d.type);
-                  })
-                  .bind;
-
-    node.append("text")
+    var texts = svg.selectAll("text.label")
+                    .data(graph.nodes)
+                    .enter().append("text")
+                    .attr("class", "label")
                     .attr("dx", 12)
-                    .attr("dy",".35em")
-                    .attr("class","text")
-                    .text(function(d) {
-                    return d.name
-                  });
+                    .attr("dy", ".35em")
+                    .text(function(d) { return d.name; });
 
     force.on("tick", function() {
-                    link.attr("d", function(d) {
-                      return "M" + d[0].x + "," + d[0].y + "S"
-                          + d[1].x + "," + d[1].y + " "
-                          + d[2].x + "," + d[2].y;
-                    });
-                    node.attr("transform",function(d) {
-                      return "translate(" + d.x + "," + d.y + ")";
-                    });
-                  });
+      /*曲线时的坐标转换代码*/
+      link.attr("d", function(d) {
+                        return "M" + d[0].x + "," + d[0].y + "S"
+                            + d[1].x + "," + d[1].y + " "
+                            + d[2].x + "," + d[2].y;
+                      });
+      /*直线时的坐标转换代码*/
+      // link.attr("x1", function(d) { return d[0].x; })
+      //   .attr("y1", function(d) { return d[0].y; })
+      //   .attr("x2", function(d) { return d[2].x; })
+      //   .attr("y2", function(d) { return d[2].y; });
+
+      node.attr("cx", function(d) { return d.x; })
+          .attr("cy", function(d) { return d.y; });
+      texts.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    });
 }
-//getdata();
+
+function redraw() {
+  console.log("here", d3.event.translate, d3.event.scale);
+  svg.attr("transform", "translate(" + d3.event.translate + ")"
+    + " scale(" + d3.event.scale + ")");
+}
 
 function filter()
 {
@@ -431,15 +440,8 @@ function filter()
   var tstart  = $("#tstart").val();
   var tend    = $("#tend").val();
   var id      = getid();
-  // console.log(per);
-  // console.log(loc);
-  // console.log(org);
-  // console.log(num);
-  // console.log(graph);
-  // console.log(coexist);
   console.log(tstart);
   console.log(tend);
-  //console.log(id);
 
 
   //judege the parameter
@@ -468,7 +470,23 @@ function filter()
       console.log(data);
       $('#process-scroll').modal('hide');
       d3.select("svg").remove();
-      svg = d3.select("graph").append("svg").attr("width", width).attr("height", height).attr("padding-top","40px");
+      svg = d3.select("graph")
+        .append("svg:svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("padding-top","40px")
+        .attr("pointer-events", "all")
+        //.append('svg:g')    
+        .append('svg:g')
+        .call(d3.behavior.zoom().on("zoom", redraw));
+      
+      svg.append('svg:rect')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'black');
+
+
+
       graph = data;
       console.log(data);
       draw(graph);
