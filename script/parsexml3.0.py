@@ -11,9 +11,9 @@ start = datetime.datetime.now()
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-org_path = './OrgProfile/'
-person_path = './PersonProfile/'
-location_path = './LocationProfile/'
+org_path = './upload/OrgProfile/'
+person_path = './upload/PersonProfile/'
+location_path = './upload/LocationProfile/'
 
 org_list = listdir(org_path)
 person_list = listdir(person_path)
@@ -32,6 +32,20 @@ for location in location_list:
     location = location_path + location
     xml_list.append(location)
 
+doc_sql = open('./upload/doc.sql', 'a+')
+relation_sql = open('./upload/relation.sql', 'a+')
+profile_sql = open('./upload/profile.sql', 'a+')
+
+print >> doc_sql, "INSERT INTO doc VALUES"
+print >> profile_sql, "INSERT INTO profile VALUES"
+print >> relation_sql, "INSERT INTO relation VALUES"
+
+doc_sql.close()
+relation_sql.close()
+profile_sql.close()
+
+total = len(xml_list)
+count = 0
 error_xml = 0
 for xml in xml_list:
     try:
@@ -40,7 +54,10 @@ for xml in xml_list:
         # first_flag 用来记录第一次的source
         first_read_flag = 1
         second_read_flag = 0
-        sql = open('v3.sql', 'a+')
+        sql = open('./upload/v3.sql', 'a+')
+        doc_sql = open('./upload/doc.sql', 'a+')
+        relation_sql = open('./upload/relation.sql', 'a+')
+        profile_sql = open('./upload/profile.sql', 'a+')
         for node in tree.iter():
             # 检索 profileid, profiletype, profilesubtype
             if (node.tag == 'profile'):
@@ -79,7 +96,7 @@ for xml in xml_list:
                         p_pubtime = value
                     elif (name == 'realtime'):
                         p_realtime = value
-                print >> sql, "INSERT INTO doc VALUES ('%s', '%s', '%s');" % (d_file, d_sentenceid, d_text)
+                print >> doc_sql, "('%s', '%s', '%s'), " % (d_file, d_sentenceid, d_text)
             # 检索 mergeCount
             elif (node.tag == 'mergeCount'):
                 p_mergecount = node.text
@@ -113,19 +130,28 @@ for xml in xml_list:
                 r_pubtime = node.attrib.get('pubtime')
                 r_realtime = node.attrib.get('realtime')
                 if (d_text):
-                    print >> sql, "INSERT INTO doc VALUES ('%s', '%s', '%s');" % (d_file, d_sentenceid, d_text)
+                    print >> doc_sql, "('%s', '%s', '%s')," % (d_file, d_sentenceid, d_text)
                 # 对realation表来说每个relation都是一条SQL
-                print >> sql, "INSERT INTO relation VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (r_sourceid, r_destid, r_type, r_ne, r_doc, r_sentenceid, r_pubtime, r_realtime)
+                print >> relation_sql, "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')," % (r_sourceid, r_destid, r_type, r_ne, r_doc, r_sentenceid, r_pubtime, r_realtime)
             second_read_flag = 1
         # 对profile表来说一个profile对应一条SQL语句
-        print >> sql, "INSERT INTO profile VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (p_profileid, p_profiletype, p_profilesubtype, p_profilename, p_sourcedoc, p_sourceid, p_pubtime, p_realtime, p_mergecount, p_mentions, p_vip)
+        print >> profile_sql, "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')," % (p_profileid, p_profiletype, p_profilesubtype, p_profilename, p_sourcedoc, p_sourceid, p_pubtime, p_realtime, p_mergecount, p_mentions, p_vip)
         f.close()
-        sql.close()
+        doc_sql.close()
+        profile_sql.close()
+        relation_sql.close()
+        count = count + 1
+        print "completed ",
+        print format(count/(total+0.0), '.4%')
     except Exception:
         err = open('err_xml.txt', 'a+')
         print >> err, xml
         error_xml = error_xml + 1
         err.close()
+        count = count + 1
+        print "completed ",
+        print format(count/(total+0.0), '.4%')
+print "error xml: ",
 print "%d" % error_xml
 
 end = datetime.datetime.now()
