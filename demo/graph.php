@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>关系可视化 v3</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">

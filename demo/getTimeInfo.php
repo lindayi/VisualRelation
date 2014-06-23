@@ -37,7 +37,7 @@
 	$titleheadline = $titleheadline." 的时间轴";
 	$count = 0;
 
-	$sqlquery = "SELECT DISTINCT destid, ne, relation.realtime, type, profiletype FROM relation,profile WHERE relation.sourceid = '".$id. "' and type not in ( \"CeMODIFIERS\",\"CeXMODIFIER_OF\") and destid = profileid";
+	$sqlquery = "SELECT DISTINCT destid, ne, relation.realtime, type, profiletype FROM relation,profile WHERE relation.sourceid = '".$id. "' and type not in ( \"CeMODIFIERS\",\"CeXMODIFIER_OF\") and destid = profileid order by relation.realtime desc limit 0,300";
 	$result = mysql_query($sqlquery);
 	$row = mysql_fetch_array($result);
 

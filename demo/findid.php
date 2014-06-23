@@ -4,7 +4,14 @@
 	$result = mysql_query("SELECT profileid FROM profile where profilename like \"".$keyword."\"", $conn);
 	
 	if (!($row = mysql_fetch_array($result)))
-		echo "<script>alert(\"对不起，没有查找到 ".$keyword." 的数据。\"); history.back() </script>";
+	{
+		$aliasresult = mysql_query("SELECT profileid, profilename FROM profile,relation WHERE profileid = relation.sourceid AND relation.type = 'CeALIASES' AND relation.ne = '".$keyword."'");
+		if (!($aliasrow = mysql_fetch_array($aliasresult)))
+			echo "<script>alert(\"对不起，没有查找到 ".$keyword." 的数据。\"); history.back() </script>";
+		else
+			echo "<script>window.location.href='graph.php?id=".$aliasrow["profileid"]."&keyword=".$aliasrow["profilename"]."';</script>";
+		
+	}
 	
 	$id[0] = $row["profileid"];
 	if (!($row = mysql_fetch_array($result)))
@@ -20,6 +27,7 @@
 <html>
 <head>
 	<title>关系可视化 v3</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<style type="text/css">

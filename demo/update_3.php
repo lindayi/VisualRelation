@@ -1,13 +1,13 @@
+<?php
+	include_once "conn.php";
+?> 
+<!DOCTYPE html>
 <html>
 <head>
 	<title>关系可视化 v3</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="./bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-	<link href="./bootstrap/css/bootstrap-switch.css" rel="stylesheet">
-	<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
-	<script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="./bootstrap/js/storyjs-embed.js"></script>
 	<style type="text/css">
 	body {
 		padding-top: 40px;
@@ -16,11 +16,9 @@
 		font-family:"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Helvetica Neue",Helvetica,Arial,"Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei UI","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
 	}
 	</style>
-
-
 </head>
 
-<body>
+<body style="background-color:#000; background-image:url(img/bg.jpg); background-repeat:no-repeat; background-position:top; background-size:cover;">
 
 <!-- 导航 -->
 <div class="container">
@@ -38,7 +36,7 @@
 					<ul class="nav">
 						<li class="divider-vertical"></li>
 						<li><a href="index.html">首　　页</a></li>
-						<li><a href="index.html">上传数据</a></li>
+						<li class="active"><a href="update.php">上传数据</a></li>
 						<li><a href="index.html">使用说明</a></li>
 						<li><a href="index.html">管理登录</a></li>
 					</ul>
@@ -54,66 +52,59 @@
 							</ul>
 						</li>
 					</ul>
-
 					<form class="navbar-search pull-right" action="findid.php" method="get">
-						<input id="keyword" type="text" name="keyword" class="search-query span2" placeholder="<?php echo $_GET['keyword']; ?>">
-						<div id="typeSwitch" class="make-switch" data-on-label="图谱" data-off-label="时间轴" data-text-label="切换模式" data-on="info" data-off="success">
-						  <input type="checkbox" unchecked />
-						</div>
+						<input type="text" name="keyword" class="search-query span2" placeholder="<?php echo $keyword;?>">
 					</form>
 				</div><!-- /.nav-collapse-->
 			</div>
 		</div><!-- /navbar-inner-->
-  </div><!-- /navbar-->
+    </div><!-- /navbar-->
 </div>
-<script>
-    var dataObject;
-    function getid()
-    {
-      var url = window.location.search;
 
-      var param = url.split('?')[1];
-      var param1= param.split('&')[0];
-      
-      return param1.split('=')[1];
-    }
-    //get keyword from search frame' placeholder
-    function getkeyword()
-    {
-      return $('#keyword').attr("placeholder");
-    }
-    $.ajax({
-        url: "getTimeInfo.php",
-        type: "GET",
-        dataType:"JSON",
-        async:false,
-        data: {
-            "id": getid(),
-            "keyword": getkeyword()
-        },
-        success: function(data) {
-            dataObject = data;
-        }
-    })
+<!-- 内容 -->
+<div class="container">
+	<div class="row" style="text-align:center;">                                                                                                  
+		<h1 style="padding-top:50px; color:#FFF">正在导入数据...[3 / 4]</h1>
+		<h3 style="color:#FFF">数据更新完成前，请务必不要关闭本窗口！</h3>
+		<h4 style="color:#FFF"><div id="timediv">&nbsp;</div></h4>
+		<p>&nbsp;</p>
+	</div>
 
-    $(document).ready(function() {
-        createStoryJS({
-            type:       'timeline',
-            source:     dataObject,
-            embed_id:   'my-timeline'
-        });
-    });
+	<div class="row" style="text-align:center;">
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 75%;"></div>
+		</div>
+	</div>
+
+</div>
+
+<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="./bootstrap/js/bootstrap.js"></script>
+<script language="javascript">
+var second=0;
+var minute=0;
+var hour=0;
+window.setTimeout("interval();",1000);
+function interval()
+{
+	second++;
+	if(second==60)
+	{
+		second=0;minute+=1;
+	}
+	if(minute==60)
+	{
+		minute=0;hour+=1;
+	}
+	var obj = document.getElementById("timediv");
+	obj.innerHTML = "已持续："+hour+"时"+minute+"分"+second+"秒";
+	window.setTimeout("interval();",1000);
+}
 </script>
-
-
-<div id="my-timeline" style="padding-top:40px; "></div>
-
-<script type="text/javascript" src="./bootstrap/js/bootstrap-switch.js"></script>
-<script>
-	$('#typeSwitch').on('switch-change', function () {
-	    window.location = "graph.php?id=" + getid() + "&keyword=" + getkeyword();
-	});
-</script>
-
+<?php
+	flush();
+	exec("sh ./upload/resort.sh");
+	echo "<script>window.location.href=\"update_4.php\";</script>\n";
+?>
 </body>
 </html>

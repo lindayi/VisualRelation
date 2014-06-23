@@ -74,6 +74,31 @@
 			case "CePerSIBLINGS_R":
 				$key[$pkey] = "兄弟姐妹";
 				break;
+			case "CeOrgSeniorExecutive":
+				$key[$pkey] = "高管";
+				break;
+			case "CeOrgSeniorExecutive_R":
+				$key[$pkey] = "高管";
+				break;
+			case "CeOrgShareholder":
+				$key[$pkey] = "股东";
+				break;
+			case "CeOrgShareholder_R":
+				$key[$pkey] = "股东";
+				break;
+			case "CeOrgEstablishmentTime":
+				$key[$pkey] = "创建时间";
+				break;
+			case "CeOrgEstablishmentTime":
+				$key[$pkey] = "创建时间";
+				break;
+			case "CeOrgSeniorExecutive":
+				$key[$pkey] = "创建人";
+				break;
+			case "CeOrgSeniorExecutive_R":
+				$key[$pkey] = "创建人";
+				break;
+
 			
 			default:
 				$key[$pkey] = $row["type"];
